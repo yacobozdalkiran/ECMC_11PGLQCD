@@ -1,0 +1,427 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gauge_su3 module &mdash; ECMC for pure gauge LQCD 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=8d563738"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="analytical_reject module" href="analytical_reject.html" />
+    <link rel="prev" title="src" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ECMC for pure gauge LQCD
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">gauge_su3 module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.calculate_action"><code class="docutils literal notranslate"><span class="pre">calculate_action()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.calculate_diff_action"><code class="docutils literal notranslate"><span class="pre">calculate_diff_action()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.calculate_plaquette"><code class="docutils literal notranslate"><span class="pre">calculate_plaquette()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.conf_est_SU3"><code class="docutils literal notranslate"><span class="pre">conf_est_SU3()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.el"><code class="docutils literal notranslate"><span class="pre">el()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.el_2"><code class="docutils literal notranslate"><span class="pre">el_2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.el_3"><code class="docutils literal notranslate"><span class="pre">el_3()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.el_5"><code class="docutils literal notranslate"><span class="pre">el_5()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.el_8"><code class="docutils literal notranslate"><span class="pre">el_8()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.est_SU3"><code class="docutils literal notranslate"><span class="pre">est_SU3()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.get_link"><code class="docutils literal notranslate"><span class="pre">get_link()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.init_conf"><code class="docutils literal notranslate"><span class="pre">init_conf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.mat_rand_su3"><code class="docutils literal notranslate"><span class="pre">mat_rand_su3()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.random"><code class="docutils literal notranslate"><span class="pre">random()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.transf_gauge"><code class="docutils literal notranslate"><span class="pre">transf_gauge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gauge_su3.update_link"><code class="docutils literal notranslate"><span class="pre">update_link()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="analytical_reject.html">analytical_reject module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="numerical_reject.html">numerical_reject module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ECMC.html">ECMC module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ECMC for pure gauge LQCD</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+      <li class="breadcrumb-item active">gauge_su3 module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/gauge_su3.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-gauge_su3">
+<span id="gauge-su3-module"></span><h1>gauge_su3 module<a class="headerlink" href="#module-gauge_su3" title="Link to this heading"></a></h1>
+<p>Useful functions to create/manipulate gauge configurations and SU(3) matrices</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.calculate_action">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">calculate_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gauge_su3.html#calculate_action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gauge_su3.calculate_action" title="Link to this definition"></a></dt>
+<dd><p>Computes the Wilson action of a gauge configuration</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conf</strong> (<em>numpy.array</em>) – gauge configuration</p></li>
+<li><p><strong>beta</strong> (<em>double</em>) – inverse coupling constant of the Wilson action</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the Wilson action of the gauge configuration</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>double</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.calculate_diff_action">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">calculate_diff_action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gauge_su3.html#calculate_diff_action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gauge_su3.calculate_diff_action" title="Link to this definition"></a></dt>
+<dd><p>Computes delta S = new action - old action the action difference where the x,t,mu link is multiplied by m</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conf</strong> (<em>numpy.array</em>) – gauge configuration</p></li>
+<li><p><strong>x</strong> (<em>int</em>) – space coordinate of the link</p></li>
+<li><p><strong>t</strong> (<em>int</em>) – time coordinate of the link</p></li>
+<li><p><strong>mu</strong> (<em>int</em>) – lorentz coordinate of the link</p></li>
+<li><p><strong>m</strong> (<em>numpy.array</em>) – updating SU(3) matrix</p></li>
+<li><p><strong>beta</strong> (<em>double</em>) – Wilson action inverse coupling constant</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the difference of action</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>double</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.calculate_plaquette">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">calculate_plaquette</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gauge_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gauge_su3.html#calculate_plaquette"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gauge_su3.calculate_plaquette" title="Link to this definition"></a></dt>
+<dd><p>Computes the plaquette at a given lattice site (x,t,mu). The operation is : U(x,t,0) U(x+1,t,1) U*(x,t+1,0)^T U*(x,t,1)^T</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gauge_config</strong> (<em>numpy.array</em>) – gauge configuration</p></li>
+<li><p><strong>x</strong> (<em>int</em>) – space coordinate of the link</p></li>
+<li><p><strong>t</strong> (<em>int</em>) – time coordinate of the link</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the plaquette (3x3 matrix)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.conf_est_SU3">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">conf_est_SU3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gauge_su3.html#conf_est_SU3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gauge_su3.conf_est_SU3" title="Link to this definition"></a></dt>
+<dd><p>Checks wheter all the matrices in a lattice gauge configuration are SU(3) matrices</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conf</strong> (<em>numpy.array</em>) – The gauge configuration to check</p></li>
+<li><p><strong>tol</strong> (<em>double</em><em>, </em><em>optional</em>) – Tolerance of numerical checks. Defaults to 1e-10.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if all the matrices in a lattice gauge configuration are SU(3) matrices, if not False</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.el">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">el</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gauge_su3.html#el"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gauge_su3.el" title="Link to this definition"></a></dt>
+<dd><p>“”Generates the exp(xi*lambda_i) where lambda_i is the i_th Gell-Mann matrice</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xi</strong> (<em>double</em>) – angle</p></li>
+<li><p><strong>index</strong> (<em>int</em>) – index of the Gell-Mann matrice, can only be 2,3,5 or 8</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if index is not 2,3,5 or 8</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>exp(xi*lambda_i)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.el_2">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">el_2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gauge_su3.html#el_2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gauge_su3.el_2" title="Link to this definition"></a></dt>
+<dd><p>Generates exp(xi*lambda_2) where lambda_2 is the 2nd Gell-Man matrice</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>xi</strong> (<em>double</em>) – angle</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>exp(xi*lambda_2)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.el_3">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">el_3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gauge_su3.html#el_3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gauge_su3.el_3" title="Link to this definition"></a></dt>
+<dd><p>Generates exp(xi*lambda_3) where lambda_3 is the 3rd Gell-Man matrice</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>xi</strong> (<em>double</em>) – angle</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>exp(xi*lambda_3)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.el_5">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">el_5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gauge_su3.html#el_5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gauge_su3.el_5" title="Link to this definition"></a></dt>
+<dd><p>Generates exp(xi*lambda_5) where lambda_5 is the 5th Gell-Man matrice</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>xi</strong> (<em>double</em>) – angle</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>exp(xi*lambda_5)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.el_8">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">el_8</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gauge_su3.html#el_8"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gauge_su3.el_8" title="Link to this definition"></a></dt>
+<dd><p>Generates exp(xi*lambda_8) where lambda_8 is the 8th Gell-Man matrice</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>xi</strong> (<em>double</em>) – angle</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>exp(xi*lambda_8)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.est_SU3">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">est_SU3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">U</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gauge_su3.html#est_SU3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gauge_su3.est_SU3" title="Link to this definition"></a></dt>
+<dd><p>Checks wether a matrix is in SU(3)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>U</strong> (<em>numpy.array</em>) – 3x3 matrix to check</p></li>
+<li><p><strong>tol</strong> (<em>double</em><em>, </em><em>optional</em>) – Tolerance of numerical checks. Defaults to 1e-10.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True is the matrix is in SU(3), False if not</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.get_link">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">get_link</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gauge_su3.html#get_link"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gauge_su3.get_link" title="Link to this definition"></a></dt>
+<dd><p>Gets a link in a gauge configuration with periodic boundary conditions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conf</strong> (<em>numpy.array</em>) – gauge configuration</p></li>
+<li><p><strong>x</strong> (<em>int</em>) – space coordinate of the link</p></li>
+<li><p><strong>t</strong> (<em>int</em>) – time coordinate of the link</p></li>
+<li><p><strong>mu</strong> (<em>int</em>) – lorentz coordinate of the link</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the matrix of the link</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.init_conf">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">init_conf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gauge_su3.html#init_conf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gauge_su3.init_conf" title="Link to this definition"></a></dt>
+<dd><p>Returns a 1+1d gauge configuration of size L*T</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>L</strong> (<em>int</em><em>, </em><em>optional</em>) – Spatial dimension of the lattice. Defaults to 3.</p></li>
+<li><p><strong>T</strong> (<em>int</em><em>, </em><em>optional</em>) – Temporal dimension of the lattice. Defaults to 3.</p></li>
+<li><p><strong>cold</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, all matrix initialized to identity, else all matrices are random. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>L*T 1+1d lattice gauge configuration</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.mat_rand_su3">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">mat_rand_su3</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gauge_su3.html#mat_rand_su3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gauge_su3.mat_rand_su3" title="Link to this definition"></a></dt>
+<dd><p>Generates a random SU(3) matrice using the parametrization of <a class="reference external" href="https://arxiv.org/abs/physics/9708015">https://arxiv.org/abs/physics/9708015</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>random SU(3) matrix</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.random">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">random</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gauge_su3.random" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.transf_gauge">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">transf_gauge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gauge_su3.html#transf_gauge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gauge_su3.transf_gauge" title="Link to this definition"></a></dt>
+<dd><p>Returns a copy of the gauge configuration where all the links were multiplied by a random SU(3) matrix to simulate a random local gauge transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>conf</strong> (<em>numpy.array</em>) – gauge configuration</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the transformed configuration</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gauge_su3.update_link">
+<span class="sig-prename descclassname"><span class="pre">gauge_su3.</span></span><span class="sig-name descname"><span class="pre">update_link</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_matrix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gauge_su3.html#update_link"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gauge_su3.update_link" title="Link to this definition"></a></dt>
+<dd><p>Updates a gauge configuration by multiplying the selected link with a matrix</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>conf</strong> (<em>numpy.array</em>) – gauge configuration</p></li>
+<li><p><strong>x</strong> (<em>int</em>) – space coordinate of the link</p></li>
+<li><p><strong>t</strong> (<em>int</em>) – time coordinate of the link</p></li>
+<li><p><strong>mu</strong> (<em>int</em>) – lorentz coordinate of the link</p></li>
+<li><p><strong>new_matrix</strong> (<em>numpy.array</em>) – the updating matrix</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="src" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="analytical_reject.html" class="btn btn-neutral float-right" title="analytical_reject module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Yacob Ozdalkiran.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

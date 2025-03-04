@@ -1,0 +1,572 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>analytical_reject &mdash; ECMC for pure gauge LQCD 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ECMC for pure gauge LQCD
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">src</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ECMC for pure gauge LQCD</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">analytical_reject</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for analytical_reject</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Generation of rejects by analytical resolution of the inversion equation. Available only for lambda_2, lambda_3 and lambda_5.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="solve_trig_eq">
+<a class="viewcode-back" href="../analytical_reject.html#analytical_reject.solve_trig_eq">[docs]</a>
+<span class="k">def</span> <span class="nf">solve_trig_eq</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">gamma</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Solves the equation acos(x)+bsin(x)+c = gamma modulo 2pi.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        a (double): coefficient of cos</span>
+<span class="sd">        b (double): coefficient of sin</span>
+<span class="sd">        c (double): constant coefficient </span>
+<span class="sd">        gamma (double): rhs of the equation</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if gamma-c must be &gt; sqrt(a^2 + b^2), no solution possible</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        double: the 2 solutions ordered</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Vérification de la condition c / sqrt(a^2 + b^2) ∈ [-1, 1]</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">rhs</span> <span class="o">=</span> <span class="n">gamma</span><span class="o">-</span><span class="n">c</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">rhs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">R</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No solution: |gamma-c| must be ≤ sqrt(a^2 + b^2).&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Calcul de theta</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>  <span class="c1"># atan2 donne le bon quadrant pour cos(theta) et sin(theta)</span>
+    
+    <span class="c1"># Calcul des solutions principales</span>
+    <span class="n">cos_argument</span> <span class="o">=</span> <span class="n">rhs</span> <span class="o">/</span> <span class="n">R</span>
+    <span class="n">acos_value</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="n">cos_argument</span><span class="p">)</span>
+    
+    <span class="c1"># Deux solutions principales</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">+</span> <span class="n">acos_value</span>
+    <span class="n">x2</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">-</span> <span class="n">acos_value</span>
+    
+    <span class="c1"># Réduction dans [0, 2*pi]</span>
+    <span class="n">x1</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+    <span class="n">x2</span> <span class="o">=</span> <span class="n">x2</span> <span class="o">%</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="coeffs">
+<a class="viewcode-back" href="../analytical_reject.html#analytical_reject.coeffs">[docs]</a>
+<span class="k">def</span> <span class="nf">coeffs</span><span class="p">(</span><span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Computes the a,b,c coefficients for a given plaquette and gell-mann index</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        plaquette (numpy.array): plaquette</span>
+<span class="sd">        index_lambda (int): gell-man index</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: the gell mann index must be 2,3 or 5</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        double,double,double: the a,b,c coefficients</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+    <span class="k">if</span> <span class="n">index_lambda</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;index_lambda invalide&quot;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="n">index_lambda</span><span class="o">==</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">plaquette</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">plaquette</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">real</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">plaquette</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">plaquette</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">real</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">plaquette</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">real</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">index_lambda</span><span class="o">==</span><span class="mi">3</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">plaquette</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">plaquette</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">real</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">plaquette</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">plaquette</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">imag</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">plaquette</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">real</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">index_lambda</span><span class="o">==</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">plaquette</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">plaquette</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">real</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="n">plaquette</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">plaquette</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">real</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">plaquette</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">real</span>
+    <span class="k">return</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span></div>
+
+
+<div class="viewcode-block" id="signes">
+<a class="viewcode-back" href="../analytical_reject.html#analytical_reject.signes">[docs]</a>
+<span class="k">def</span> <span class="nf">signes</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a tuple of either 1, -1, or 0 based on the signs of the real numbers a and b</span>
+
+<span class="sd">    Args:  </span>
+<span class="sd">    a (double): real number  </span>
+<span class="sd">    b (double): real number  </span>
+
+<span class="sd">    Returns:  </span>
+<span class="sd">        (int, int): returns (1, _) if a &gt; 0, (-1, _) if a &lt; 0, (0, _) if a = 0; same for b  </span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+    <span class="k">if</span> <span class="n">a</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">b</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">a</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">/</span><span class="n">b</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">/</span><span class="n">a</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">/</span><span class="n">a</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">/</span><span class="n">b</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="reduce">
+<a class="viewcode-back" href="../analytical_reject.html#analytical_reject.reduce">[docs]</a>
+<span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span><span class="n">plaquette</span><span class="p">,</span><span class="n">index_lambda</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns gamma with the periodic contributions corresponding to index_lambda removed, see Tables 3 and 4 of the PDF document.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gamma (double): the real number to reduce</span>
+<span class="sd">        plaquette (numpy.array): the plaquette used to compute a,b coefficients</span>
+<span class="sd">        index_lambda (int): the index of the gell-mann matrix, defines the contribution to remove</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: index_lambda must be in 2,3,5</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        double: reduced gamma</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="o">*</span><span class="n">_</span><span class="o">=</span> <span class="n">coeffs</span><span class="p">(</span><span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">index_lambda</span><span class="o">==</span><span class="mi">2</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">index_lambda</span><span class="o">==</span><span class="mi">5</span><span class="p">):</span> <span class="c1">#dans ce cas, l&#39;angle est entre 0 et pi/2 -&gt; table 3</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">b</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+            <span class="n">mod</span> <span class="o">=</span> <span class="n">gamma</span><span class="o">%</span><span class="n">R</span>
+            <span class="c1">#if mod &gt; R/2:</span>
+            <span class="c1">#    mod -= R</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+            <span class="n">mod</span> <span class="o">=</span> <span class="n">gamma</span><span class="o">%</span><span class="n">R</span>
+            <span class="c1">#if mod &gt; R/2:</span>
+            <span class="c1">#    mod -= R</span>
+            
+    <span class="k">elif</span> <span class="p">(</span><span class="n">index_lambda</span><span class="o">==</span><span class="mi">3</span><span class="p">):</span> <span class="c1">#dans ce cas, l&#39;angle est entre 0 et pi -&gt; table 4</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">mod</span> <span class="o">=</span> <span class="n">gamma</span><span class="o">%</span><span class="n">R</span>
+        <span class="c1">#if mod &gt; R/2:</span>
+        <span class="c1">#    mod -= R</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong value for index_lambda&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mod</span></div>
+
+
+<div class="viewcode-block" id="gamma_aller_retour">
+<a class="viewcode-back" href="../analytical_reject.html#analytical_reject.gamma_aller_retour">[docs]</a>
+<span class="k">def</span> <span class="nf">gamma_aller_retour</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Takes a gamma, reduces it, and returns True if it is reached during the forward path, False otherwise.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gamma (double): the real number to reduce</span>
+<span class="sd">        plaquette (numpy.array): the plaquette used to compute a,b coefficients</span>
+<span class="sd">        index_lambda (int): the index of the gell-mann matrix</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if gamma is reached during the forward path, False otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">coeffs</span><span class="p">(</span><span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="n">signes</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">aller</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">match</span> <span class="n">index_lambda</span><span class="p">:</span>
+        <span class="k">case</span> <span class="mi">2</span><span class="o">|</span><span class="mi">5</span><span class="p">:</span>
+            <span class="k">match</span> <span class="n">sign</span><span class="p">:</span>
+                <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">a</span>
+                <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="n">b</span>
+                <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+                <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">case</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+                <span class="k">case</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+                <span class="k">case</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">case</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">match</span> <span class="n">sign</span><span class="p">:</span>
+                <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span>
+                <span class="k">case</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="n">b</span>
+                <span class="k">case</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="o">-</span><span class="n">b</span>
+                <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">a</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">&lt;=</span> <span class="n">aller</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="retire_contrib_aller">
+<a class="viewcode-back" href="../analytical_reject.html#analytical_reject.retire_contrib_aller">[docs]</a>
+<span class="k">def</span> <span class="nf">retire_contrib_aller</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Removes a forward contribution from gamma.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gamma (double): the real number to reduce</span>
+<span class="sd">        plaquette (numpy.array): the plaquette used to compute a,b coefficients</span>
+<span class="sd">        index_lambda (int): the index of the gell-mann matrix, defines the contribution to remove</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        double: reduced gamma</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">coeffs</span><span class="p">(</span><span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="n">signes</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">aller</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">match</span> <span class="n">index_lambda</span><span class="p">:</span>
+        <span class="k">case</span> <span class="mi">2</span><span class="o">|</span><span class="mi">5</span><span class="p">:</span>
+            <span class="k">match</span> <span class="n">sign</span><span class="p">:</span>
+                <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">a</span>
+                <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="n">b</span>
+                <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">aller</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="k">case</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">aller</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">a</span>
+    
+    <span class="k">return</span> <span class="n">gamma</span> <span class="o">-</span> <span class="n">aller</span></div>
+
+
+<div class="viewcode-block" id="intervalle">
+<a class="viewcode-back" href="../analytical_reject.html#analytical_reject.intervalle">[docs]</a>
+<span class="k">def</span> <span class="nf">intervalle</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Takes a gamma, reduces it, checks if it is reached during a forward or backward path, and returns the interval in which to search for the rejection angle, given that the variable t represents the total displacement (cf pdf for xi parametrization)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gamma (double): the real number to reduce</span>
+<span class="sd">        plaquette (numpy.array): the plaquette used to compute a,b coefficients</span>
+<span class="sd">        index_lambda (int): the index of the gell-mann matrix</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (double,double): the bound of the intervall on which gamma is attained for the t variable (cf pdf for xi(t) parametrization)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">coeffs</span><span class="p">(</span><span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="n">signes</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">a_r</span> <span class="o">=</span> <span class="n">gamma_aller_retour</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+    <span class="k">if</span> <span class="n">a_r</span><span class="p">:</span>
+        <span class="k">match</span> <span class="n">index_lambda</span><span class="p">:</span>
+            <span class="k">case</span> <span class="mi">2</span><span class="o">|</span><span class="mi">5</span><span class="p">:</span>
+                <span class="k">match</span> <span class="n">sign</span><span class="p">:</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">b</span><span class="o">/</span><span class="n">a</span><span class="p">)</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">b</span><span class="o">/</span><span class="n">a</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span>
+            <span class="k">case</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">match</span> <span class="n">sign</span><span class="p">:</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">b</span><span class="o">/</span><span class="n">a</span><span class="p">)</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">b</span><span class="o">/</span><span class="n">a</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">b</span><span class="o">/</span><span class="n">a</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">b</span><span class="o">/</span><span class="n">a</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">match</span> <span class="n">index_lambda</span><span class="p">:</span>
+            <span class="k">case</span> <span class="mi">2</span><span class="o">|</span><span class="mi">5</span><span class="p">:</span>
+                <span class="k">match</span> <span class="n">sign</span><span class="p">:</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">b</span><span class="o">/</span><span class="n">a</span><span class="p">)</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">b</span><span class="o">/</span><span class="n">a</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+            <span class="k">case</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">match</span> <span class="n">sign</span><span class="p">:</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">b</span><span class="o">/</span><span class="n">a</span><span class="p">)</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">b</span><span class="o">/</span><span class="n">a</span><span class="p">),</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">b</span><span class="o">/</span><span class="n">a</span><span class="p">),</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="n">b</span><span class="o">/</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bound1</span><span class="p">,</span><span class="n">bound2</span></div>
+
+
+<div class="viewcode-block" id="coeffs_ana">
+<a class="viewcode-back" href="../analytical_reject.html#analytical_reject.coeffs_ana">[docs]</a>
+<span class="k">def</span> <span class="nf">coeffs_ana</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Takes a gamma, reduces it, checks if it is forward or backwards; if backwards, returns a and b correctly modified according to index_lambda.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gamma (double): the real number to reduce</span>
+<span class="sd">        plaquette (numpy.array): the plaquette used to compute a,b coefficients</span>
+<span class="sd">        index_lambda (int): the index of the gell-mann matrix</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        double, double: +/-a,+/-b according to the case </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">coeffs</span><span class="p">(</span><span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="n">signes</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">a_r</span> <span class="o">=</span> <span class="n">gamma_aller_retour</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="n">new_a</span><span class="p">,</span> <span class="n">new_b</span> <span class="o">=</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">a_r</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">((</span><span class="n">a</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span><span class="ow">or</span><span class="p">(</span><span class="n">b</span><span class="o">==</span><span class="mi">0</span><span class="p">)):</span>
+        <span class="k">match</span> <span class="n">index_lambda</span><span class="p">:</span>
+            <span class="k">case</span> <span class="mi">2</span><span class="o">|</span><span class="mi">5</span><span class="p">:</span>
+                <span class="n">new_a</span> <span class="o">=</span> <span class="o">-</span><span class="n">a</span>
+            <span class="k">case</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">new_b</span> <span class="o">=</span> <span class="o">-</span><span class="n">b</span>
+    <span class="k">return</span> <span class="n">new_a</span><span class="p">,</span> <span class="n">new_b</span></div>
+
+
+
+<div class="viewcode-block" id="coeff_c">
+<a class="viewcode-back" href="../analytical_reject.html#analytical_reject.coeff_c">[docs]</a>
+<span class="k">def</span> <span class="nf">coeff_c</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the value of c&#39; (cf pdf) needed to solve the reject equation</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gamma (double): the real number to reduce</span>
+<span class="sd">        plaquette (numpy.array): the plaquette used to compute a,b coefficients</span>
+<span class="sd">        index_lambda (int): the index of the gell-mann matrix</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if the corresponding (a,b) sign does not match the assessement of foward/backward path (cf tables)</span>
+<span class="sd">        ValueError: if the corresponding (a,b) sign does not match the assessement of foward/backward path (cf tables)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        double: the c&#39; coefficient</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">coeffs</span><span class="p">(</span><span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="n">signes</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">a_r</span> <span class="o">=</span> <span class="n">gamma_aller_retour</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">a_r</span><span class="p">:</span>
+        <span class="k">match</span> <span class="n">index_lambda</span><span class="p">:</span>
+            <span class="k">case</span> <span class="mi">2</span><span class="o">|</span><span class="mi">5</span><span class="p">:</span>
+                <span class="k">match</span> <span class="n">sign</span><span class="p">:</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="o">-</span><span class="n">a</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="n">r</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;On ne peut pas être dans un aller&quot;</span><span class="p">)</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="o">-</span><span class="n">a</span>
+            <span class="k">case</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">match</span> <span class="n">sign</span><span class="p">:</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="o">-</span><span class="n">a</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="n">r</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="n">r</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="o">-</span><span class="n">a</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">match</span> <span class="n">index_lambda</span><span class="p">:</span>
+            <span class="k">case</span> <span class="mi">2</span><span class="o">|</span><span class="mi">5</span><span class="p">:</span>
+                <span class="k">match</span> <span class="n">sign</span><span class="p">:</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="o">-</span><span class="n">b</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="n">r</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="o">-</span><span class="n">b</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;On ne peut pas être dans un retour&quot;</span><span class="p">)</span>
+            <span class="k">case</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">match</span> <span class="n">sign</span><span class="p">:</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="n">a</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="n">r</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="n">r</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="n">c</span> <span class="o">=</span> <span class="n">a</span>
+    <span class="k">return</span> <span class="n">c</span></div>
+
+
+<div class="viewcode-block" id="rejet_ana">
+<a class="viewcode-back" href="../analytical_reject.html#analytical_reject.rejet_ana">[docs]</a>
+<span class="k">def</span> <span class="nf">rejet_ana</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Takes a gamma, reduces it, checks if it is forward or backward; if backward, removes the forward contribution, then solves the inversion equation in the correct interval and returns the corresponding angle xi(t).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gamma (double): the real number to reduce</span>
+<span class="sd">        plaquette (numpy.array): the plaquette used to compute a,b coefficients</span>
+<span class="sd">        index_lambda (int): the index of the gell-mann matrix</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: if we have 2 solutions in the determined interval</span>
+<span class="sd">        ValueError: if we have no solutions in the determined interval</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        double: the reject angle xi(t)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="n">a</span><span class="p">,</span><span class="n">b</span> <span class="o">=</span> <span class="n">coeffs_ana</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+    <span class="n">sign</span> <span class="o">=</span> <span class="n">signes</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">a_r</span> <span class="o">=</span> <span class="n">gamma_aller_retour</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">a</span><span class="o">==</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">b</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        
+        <span class="k">match</span> <span class="n">index_lambda</span><span class="p">:</span>
+            <span class="k">case</span> <span class="mi">2</span><span class="o">|</span><span class="mi">5</span><span class="p">:</span>
+                <span class="k">match</span> <span class="n">sign</span><span class="p">:</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="n">gamma</span><span class="o">/</span><span class="p">(</span><span class="o">-</span><span class="n">a</span><span class="p">))</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="n">gamma</span><span class="o">/</span><span class="n">a</span> <span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asin</span><span class="p">(</span><span class="n">gamma</span><span class="o">/</span><span class="n">b</span><span class="p">)</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">asin</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">gamma</span><span class="o">/</span><span class="n">b</span><span class="p">)</span> 
+            <span class="k">case</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">match</span> <span class="n">sign</span><span class="p">:</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="n">gamma</span><span class="o">/</span><span class="n">a</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="n">gamma</span><span class="o">/</span><span class="n">a</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asin</span><span class="p">(</span><span class="n">gamma</span><span class="o">/</span><span class="n">b</span><span class="p">)</span>
+                    <span class="k">case</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asin</span><span class="p">(</span><span class="n">gamma</span><span class="o">/</span><span class="n">b</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">bound1</span><span class="p">,</span> <span class="n">bound2</span> <span class="o">=</span> <span class="n">intervalle</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">coeff_c</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+        <span class="n">x1</span><span class="p">,</span><span class="n">x2</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span>
+        <span class="k">if</span> <span class="n">a_r</span><span class="p">:</span>
+            <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="o">=</span> <span class="n">solve_trig_eq</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">gamma</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">gamma</span> <span class="o">=</span> <span class="n">retire_contrib_aller</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+            <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="o">=</span> <span class="n">solve_trig_eq</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">gamma</span><span class="p">)</span>
+        <span class="n">sol1</span><span class="p">,</span><span class="n">sol2</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span>
+        <span class="n">sol</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">bound1</span> <span class="o">&lt;=</span> <span class="n">x1</span> <span class="o">&lt;=</span> <span class="n">bound2</span><span class="p">):</span>
+            <span class="n">sol1</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">sol</span> <span class="o">=</span> <span class="n">x1</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">bound1</span> <span class="o">&lt;=</span> <span class="n">x2</span> <span class="o">&lt;=</span> <span class="n">bound2</span><span class="p">):</span>
+            <span class="n">sol2</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">sol</span> <span class="o">=</span> <span class="n">x2</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sol1</span><span class="o">==</span><span class="kc">True</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">sol2</span><span class="o">==</span><span class="kc">True</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Deux solutions possibles dans l&#39;intervalle&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">sol1</span><span class="o">==</span><span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">sol2</span><span class="o">==</span><span class="kc">False</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">plaquette</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Aucune solution possible dans l&#39;intervalle&quot;</span><span class="p">)</span>
+        <span class="c1">#sol est donc le t rejet. On veut maintenant le xi rejet</span>
+        <span class="n">xi</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">a_r</span><span class="p">:</span>
+            <span class="n">xi</span> <span class="o">=</span> <span class="n">sol</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">index_lambda</span><span class="o">==</span><span class="mi">2</span> <span class="ow">or</span> <span class="n">index_lambda</span><span class="o">==</span><span class="mi">5</span><span class="p">:</span>
+                <span class="n">xi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">sol</span>
+            <span class="k">if</span> <span class="n">index_lambda</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+                <span class="n">xi</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">sol</span>
+        <span class="k">return</span> <span class="n">xi</span></div>
+
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Yacob Ozdalkiran.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

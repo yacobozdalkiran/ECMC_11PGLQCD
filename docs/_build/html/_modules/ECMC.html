@@ -1,0 +1,367 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ECMC &mdash; ECMC for pure gauge LQCD 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ECMC for pure gauge LQCD
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">src</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ECMC for pure gauge LQCD</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">ECMC</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for ECMC</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">analytical_reject</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">gauge_su3</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">numerical_reject</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">clear_output</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randrange</span>
+
+<div class="viewcode-block" id="ECMC_step">
+<a class="viewcode-back" href="../ECMC.html#ECMC.ECMC_step">[docs]</a>
+<span class="k">def</span> <span class="nf">ECMC_step</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;&quot;Performs an ECMC step: returns the matrix X = exp(i xi lambda_{indice_lambda}) and the angle xi of the rejection event for the link (x,t,mu) of the configuration conf, as well as next_link, the link in the plaquette responsible for the rejection that will need to be changed afterward. index_lambda can only take values 2, 3, 5, or 8.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conf (numpy.array): 1+1d lattice gauge configuration</span>
+<span class="sd">        x (int): spatial coordinate of the link</span>
+<span class="sd">        t (int): temporal coordinate of the link</span>
+<span class="sd">        mu (int): lorentz coordinate of the link</span>
+<span class="sd">        index_lambda (int): direction of updating</span>
+<span class="sd">        beta (double): Wilson action inverse coupling constant</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: index_lambda must be 2,3,5 or 8</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.array, double, (int,int,int): updating matrix X, angle of updating xi, next link to update (x,t,mu)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">index_lambda</span><span class="o">!=</span><span class="mi">2</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">index_lambda</span><span class="o">!=</span><span class="mi">3</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">index_lambda</span><span class="o">!=</span><span class="mi">5</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">index_lambda</span><span class="o">!=</span><span class="mi">8</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong index_lambda value, must be in {2,3,5,8}&quot;</span><span class="p">)</span>
+    <span class="c1">#On calcule les deux plaquettes contenant le lien :</span>
+    <span class="n">L</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">plaquette_1</span> <span class="o">=</span> <span class="n">calculate_plaquette</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">plaquette_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="nb">complex</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">mu</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">plaquette_2</span> <span class="o">=</span> <span class="n">calculate_plaquette</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">mu</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">plaquette_2</span> <span class="o">=</span> <span class="n">calculate_plaquette</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> 
+
+    <span class="c1">#Le xi rejet qui sera rendu à la fin</span>
+    <span class="n">xi</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="c1">#xi rejet dans les plaquettes 1 et 2</span>
+    <span class="n">xi_1</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">xi_2</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">p_1</span> <span class="o">=</span> <span class="n">random</span><span class="p">()</span>
+    <span class="n">p_2</span> <span class="o">=</span> <span class="n">random</span><span class="p">()</span>
+    <span class="n">gamma_1</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="o">/</span><span class="n">beta</span><span class="p">)</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p_1</span><span class="p">)</span>
+    <span class="n">gamma_2</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="o">/</span><span class="n">beta</span><span class="p">)</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p_2</span><span class="p">)</span>
+
+    
+    <span class="k">match</span> <span class="n">index_lambda</span><span class="p">:</span>
+        <span class="k">case</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">xi_1</span> <span class="o">=</span> <span class="n">solve_8</span><span class="p">(</span><span class="n">gamma_1</span><span class="p">,</span> <span class="n">plaquette_1</span><span class="p">)</span>
+                <span class="n">xi_2</span> <span class="o">=</span> <span class="n">solve_8</span><span class="p">(</span><span class="n">gamma_2</span><span class="p">,</span> <span class="n">plaquette_2</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># Capture toutes les exceptions standard</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">gamma_1</span><span class="p">,</span><span class="n">plaquette_1</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">gamma_2</span><span class="p">,</span><span class="n">plaquette_2</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Une erreur est survenue : </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">raise</span>
+        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">xi_1</span> <span class="o">=</span> <span class="n">rejet_ana</span><span class="p">(</span><span class="n">gamma_1</span><span class="p">,</span> <span class="n">plaquette_1</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+                <span class="n">xi_2</span> <span class="o">=</span> <span class="n">rejet_ana</span><span class="p">(</span><span class="n">gamma_2</span><span class="p">,</span> <span class="n">plaquette_2</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># Capture toutes les exceptions standard</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">gamma_1</span><span class="p">,</span><span class="n">plaquette_1</span><span class="p">,</span><span class="n">index_lambda</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">gamma_2</span><span class="p">,</span><span class="n">plaquette_2</span><span class="p">,</span><span class="n">index_lambda</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Une erreur est survenue : </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">raise</span>
+    <span class="c1">#On choisit le xi le plus petit</span>
+    <span class="n">xi</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">xi_1</span><span class="p">,</span> <span class="n">xi_2</span><span class="p">)</span>
+
+    <span class="n">next_link</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="c1">#On choisit le prochain lien a modifier dans la plaquette responsable du refus, en prenant le prochain lien dans le sens trigo</span>
+    <span class="c1">#(les plaquettes sont orientées dans le sens trigo)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">xi_1</span><span class="o">&lt;=</span><span class="n">xi_2</span><span class="p">):</span>
+        <span class="c1">#print(&quot;Refus dans la 1ère plaquette&quot;)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">mu</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+            <span class="n">next_link</span> <span class="o">=</span> <span class="p">((</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">L</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">mu</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">next_link</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">t</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1">#print(&quot;Refus dans la 2ème plaquette&quot;)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">mu</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+            <span class="n">next_link</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">,(</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">T</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">mu</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">next_link</span> <span class="o">=</span> <span class="p">((</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">L</span><span class="p">,(</span><span class="n">t</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">T</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">X</span> <span class="o">=</span> <span class="n">el</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">next_link</span></div>
+
+
+
+<div class="viewcode-block" id="ECMC_step_l">
+<a class="viewcode-back" href="../ECMC.html#ECMC.ECMC_step_l">[docs]</a>
+<span class="k">def</span> <span class="nf">ECMC_step_l</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">angle_l</span><span class="p">,</span> <span class="n">param_lambda_l</span><span class="p">,</span> <span class="n">param_pos_l</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the configuration conf after ECMC steps starting from the point (x, t, mu) until the total angle traveled reaches angle_l.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conf (numpy.array): 1+1d lattice gauge configuration</span>
+<span class="sd">        x (int): spatial coordinate of the link</span>
+<span class="sd">        t (int): temporal coordinate of the link</span>
+<span class="sd">        mu (int): lorentz coordinate of the link</span>
+<span class="sd">        index_lambda (int): direction of updating</span>
+<span class="sd">        beta (double): Wilson action inverse coupling constant</span>
+<span class="sd">        angle_l (double): total distance upon which we select a sample</span>
+<span class="sd">        param_lambda_l (double): poisson law parameter of the total distance upon which we change the direction of updating</span>
+<span class="sd">        param_pos_l (double): poisson law parameter of the total distance upon which we randomly change the updated link</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: angle_l must be positive</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">angle_l</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;angle_l doit être strictement positif&quot;</span><span class="p">)</span>
+        
+    <span class="n">L</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">shape</span>
+    
+    <span class="c1">#Position du lien courant (celui qui se fait modifier)</span>
+    <span class="n">x_c</span> <span class="o">=</span> <span class="n">x</span><span class="o">%</span><span class="n">L</span>
+    <span class="n">t_c</span> <span class="o">=</span> <span class="n">t</span><span class="o">%</span><span class="n">T</span>
+    <span class="n">mu_c</span> <span class="o">=</span> <span class="n">mu</span>
+
+    <span class="c1">#génération des longueurs de déplacement au bout desquelles on change la position du lien de jauge à modifier et la direction de déplacement</span>
+    <span class="n">pos_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">param_pos_l</span><span class="p">)</span>
+    <span class="n">lambda_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">param_lambda_l</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pos_l = &quot;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">pos_l</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;lambda_l = &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">lambda_l</span><span class="p">))</span>
+    <span class="c1">#angle total</span>
+    <span class="n">angle</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    
+    <span class="c1">#liste des indices de lambda dans l&#39;ordre et déplacement total depuis le dernier changement de direction</span>
+    <span class="n">index_lambda</span> <span class="o">=</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">angle_lambda</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1">#déplacement total depuis le dernier changement de lien aléatoire</span>
+    <span class="n">angle_pos</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1">#Pour afficher la progression</span>
+    <span class="n">printer</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">counter_rejects</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;*--------------------------------------------------------------------* &quot;</span><span class="p">)</span>
+    <span class="c1">#prefixe.append(&quot;*--------------------------------------------------------------------* &quot;)</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">angle</span> <span class="o">&lt;</span> <span class="n">angle_l</span><span class="p">):</span>
+        
+        <span class="n">X</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">next_link</span> <span class="o">=</span> <span class="n">ECMC_step</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">x_c</span><span class="p">,</span> <span class="n">t_c</span><span class="p">,</span> <span class="n">mu_c</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">beta</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="n">angle</span> <span class="o">+</span> <span class="n">xi</span>  <span class="o">&gt;</span> <span class="n">angle_l</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">angle_pos</span> <span class="o">+</span> <span class="n">xi</span> <span class="o">&gt;</span> <span class="n">pos_l</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">angle_lambda</span> <span class="o">+</span> <span class="n">xi</span> <span class="o">&gt;</span> <span class="n">lambda_l</span><span class="p">):</span>
+            
+            <span class="n">diff_angle</span> <span class="o">=</span> <span class="n">angle_l</span> <span class="o">-</span> <span class="n">angle</span>
+            <span class="n">diff_pos</span> <span class="o">=</span> <span class="n">pos_l</span> <span class="o">-</span> <span class="n">angle_pos</span>
+            <span class="n">diff_lambda</span> <span class="o">=</span> <span class="n">lambda_l</span> <span class="o">-</span> <span class="n">angle_lambda</span>
+            <span class="n">min_diff</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">diff_angle</span><span class="p">,</span> <span class="n">diff_pos</span><span class="p">,</span> <span class="n">diff_lambda</span><span class="p">)</span>
+
+            <span class="n">X</span> <span class="o">=</span> <span class="n">el</span><span class="p">(</span><span class="n">min_diff</span><span class="p">,</span> <span class="n">index_lambda</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">update_link</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">x_c</span><span class="p">,</span> <span class="n">t_c</span><span class="p">,</span> <span class="n">mu_c</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="p">(</span><span class="n">min_diff</span> <span class="o">==</span> <span class="n">diff_angle</span><span class="p">):</span>
+                <span class="n">angle</span> <span class="o">=</span> <span class="n">angle_l</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Angle limite atteint, &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter_rejects</span><span class="p">)</span> <span class="o">+</span><span class="s2">&quot; rejets générés&quot;</span><span class="p">)</span>
+                
+            <span class="k">if</span> <span class="p">(</span><span class="n">min_diff</span> <span class="o">==</span> <span class="n">diff_pos</span><span class="p">):</span>
+                <span class="n">x_c</span><span class="p">,</span> <span class="n">t_c</span><span class="p">,</span> <span class="n">mu_c</span> <span class="o">=</span> <span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">L</span><span class="p">),</span> <span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">T</span><span class="p">),</span> <span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">angle_pos</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">pos_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">param_pos_l</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Changement de lien aléatoire&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;New pos_l = &quot;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">pos_l</span><span class="p">)</span> <span class="o">+</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                
+            <span class="k">if</span> <span class="p">(</span><span class="n">min_diff</span> <span class="o">==</span> <span class="n">diff_lambda</span><span class="p">):</span>
+                <span class="n">x_c</span><span class="p">,</span> <span class="n">t_c</span><span class="p">,</span> <span class="n">mu_c</span> <span class="o">=</span> <span class="n">next_link</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">i</span><span class="o">%</span><span class="nb">len</span><span class="p">(</span><span class="n">index_lambda</span><span class="p">)</span>
+                <span class="n">angle_lambda</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">lambda_l</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">param_lambda_l</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Changement de direction de déplacement, on passe à $\lambda_&quot;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">index_lambda</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">+</span><span class="sa">r</span><span class="s2">&quot;$&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;New lambda_l = &quot;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">lambda_l</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="n">update_link</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">x_c</span><span class="p">,</span> <span class="n">t_c</span><span class="p">,</span> <span class="n">mu_c</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+            <span class="n">x_c</span><span class="p">,</span> <span class="n">t_c</span><span class="p">,</span> <span class="n">mu_c</span> <span class="o">=</span> <span class="n">next_link</span>
+            <span class="n">angle</span> <span class="o">+=</span> <span class="n">xi</span>
+            <span class="n">angle_pos</span> <span class="o">+=</span> <span class="n">xi</span>
+            <span class="n">angle_lambda</span> <span class="o">+=</span> <span class="n">xi</span>
+            
+        <span class="n">counter_rejects</span><span class="o">+=</span><span class="mi">1</span>    
+        <span class="c1">#Module pour afficher la progression</span>
+        <span class="c1">#clear_output(wait=True)</span>
+        <span class="c1">#for s in prefixe:</span>
+        <span class="c1">#    print(s)</span>
+        <span class="c1">#print(f&quot;Distance totale parcourue : {angle/angle_l*100:.2f}% avant génération de sample, {counter_rejects} rejets générés&quot;)</span>
+        <span class="c1">#print(f&quot;{angle_pos/pos_l *100:.2f}% avant changement de lien, distance limite : {pos_l}&quot;)</span>
+        <span class="c1">#print(f&quot;{angle_lambda/lambda_l *100:.2f}% avant changement de direction, distance limite : {lambda_l}&quot;)</span>
+        <span class="c1">#print(&quot;*--------------------------------------------------------------------*&quot;)</span>
+        <span class="c1">#Fin du module pour afficher la progression</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="n">angle</span><span class="o">&gt;</span><span class="n">printer</span><span class="o">*</span><span class="p">(</span><span class="n">angle_l</span><span class="o">/</span><span class="mi">10</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">printer</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">% d</span><span class="s2">e angle_l parcourus, &quot;</span> <span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">counter_rejects</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; rejets générés&quot;</span><span class="p">)</span>
+            <span class="n">printer</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample généré !&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ECMC_samples">
+<a class="viewcode-back" href="../ECMC.html#ECMC.ECMC_samples">[docs]</a>
+<span class="k">def</span> <span class="nf">ECMC_samples</span><span class="p">(</span><span class="n">L</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">cold</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">2.55</span><span class="p">,</span> <span class="n">angle_l</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span> <span class="n">param_lambda_l</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">param_pos_l</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns n samples of gauge configurations sampled from the probability distribution induced by the Wilson action</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        L (int, optional): spatial length of the lattice. Defaults to 4.</span>
+<span class="sd">        T (int, optional): temporal length of the lattice. Defaults to 4.</span>
+<span class="sd">        cold (bool, optional): True if cold start, False for hot start. Defaults to True.</span>
+<span class="sd">        beta (double): Wilson action inverse coupling constant</span>
+<span class="sd">        angle_l (double): total distance upon which we select a sample</span>
+<span class="sd">        param_lambda_l (double): poisson law parameter of the total distance upon which we change the direction of updating</span>
+<span class="sd">        param_pos_l (double): poisson law parameter of the total distance upon which we randomly change the updated link</span>
+<span class="sd">        n (int, optional): number of samples to generate. Defaults to 5.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list of numpy.array: list of n samples of gauge configurations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conf</span> <span class="o">=</span> <span class="n">init_conf</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">cold</span><span class="p">)</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">mu</span> <span class="o">=</span> <span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">L</span><span class="p">),</span> <span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">T</span><span class="p">),</span> <span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">sample</span> <span class="o">=</span> <span class="p">[</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">conf</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Génération du sample &quot;</span> <span class="o">+</span>  <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-------------------------------------------------------------------&quot;</span><span class="p">)</span>
+        <span class="c1">#prefixe.append(&quot;Génération du sample &quot; +  str(i+1) + &quot;...&quot;)</span>
+        <span class="n">ECMC_step_l</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">angle_l</span><span class="p">,</span> <span class="n">param_lambda_l</span><span class="p">,</span> <span class="n">param_pos_l</span><span class="p">)</span>
+        <span class="n">conf_sample</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">conf</span><span class="p">)</span>
+        <span class="n">sample</span> <span class="o">+=</span> <span class="p">[</span><span class="n">conf_sample</span><span class="p">]</span>
+        <span class="c1">#prefixe = prefixe[(i+2):]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; généré !&quot;</span><span class="p">)</span>
+        <span class="c1">#prefixe.append(&quot;Sample &quot; + str(i+1) + &quot; généré !&quot;)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tous les samples ont été générés avec succès !&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sample</span></div>
+
+
+<div class="viewcode-block" id="walker_action">
+<a class="viewcode-back" href="../ECMC.html#ECMC.walker_action">[docs]</a>
+<span class="k">def</span> <span class="nf">walker_action</span><span class="p">(</span><span class="n">L</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">cold</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">beta</span> <span class="o">=</span> <span class="mf">2.55</span><span class="p">,</span> <span class="n">angle_l</span> <span class="o">=</span> <span class="mi">120</span><span class="p">,</span> <span class="n">param_lambda_l</span> <span class="o">=</span> <span class="mi">15</span><span class="p">,</span> <span class="n">param_pos_l</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the list of actions of n samples of gauge configurations sampled from the probability distribution induced by the Wilson action</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        L (int, optional): spatial length of the lattice. Defaults to 4.</span>
+<span class="sd">        T (int, optional): temporal length of the lattice. Defaults to 4.</span>
+<span class="sd">        cold (bool, optional): True if cold start, False for hot start. Defaults to True.</span>
+<span class="sd">        beta (double): Wilson action inverse coupling constant</span>
+<span class="sd">        angle_l (double): total distance upon which we select a sample</span>
+<span class="sd">        param_lambda_l (double): poisson law parameter of the total distance upon which we change the direction of updating</span>
+<span class="sd">        param_pos_l (double): poisson law parameter of the total distance upon which we randomly change the updated link</span>
+<span class="sd">        n (int, optional): number of samples to generate. Defaults to 5.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list of double: list of actions of n samples of gauge configurations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sample_walker</span> <span class="o">=</span> <span class="n">ECMC_samples</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">cold</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">angle_l</span><span class="p">,</span> <span class="n">param_lambda_l</span><span class="p">,</span> <span class="n">param_pos_l</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">actions</span> <span class="o">=</span> <span class="p">[</span><span class="n">calculate_action</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sample_walker</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">actions</span></div>
+
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Yacob Ozdalkiran.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
