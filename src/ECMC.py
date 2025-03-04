@@ -249,5 +249,3 @@ def walker_action(L = 4, T = 4, cold = True, beta = 2.55, angle_l = 120, param_l
     sample_walker = ECMC_samples(L, T, cold, beta, angle_l, param_lambda_l, param_pos_l,n)
     actions = [calculate_action(i, beta) for i in sample_walker]
     return actions
-
-print("test")
