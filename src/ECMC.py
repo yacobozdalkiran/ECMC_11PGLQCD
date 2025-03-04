@@ -1,8 +1,6 @@
 from analytical_reject import *
 from gauge_su3 import *
 from numerical_reject import *
-import sys
-from IPython.display import clear_output
 from random import randrange
 
 def ECMC_step(conf, x, t, mu, index_lambda, beta):
