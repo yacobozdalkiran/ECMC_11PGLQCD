@@ -250,3 +250,4 @@ def walker_action(L = 4, T = 4, cold = True, beta = 2.55, angle_l = 120, param_l
     actions = [calculate_action(i, beta) for i in sample_walker]
     return actions
 
+print("test")
