@@ -42,3 +42,13 @@ You can execute the python script :
 ```bash
 python test.py
 ```
+
+If you want to create the python script in another folder, you just have to add those lines at the beginning of your script :
+```python
+import sys
+sys.path.append('/path/to/src')
+
+from ECMC import *
+
+#Your code...
+```
