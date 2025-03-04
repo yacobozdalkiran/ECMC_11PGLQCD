@@ -36,3 +36,9 @@ print("Action after ECMC step : " +str(calculate_action(c, beta)))
 sample = ECMC_samples(L=3, T=3, cold = True, beta=1.55, angle_l=120, param_lambda_l=15, param_pos_l=30, n=3)
 
 ```
+
+You can execute the python script :
+
+```bash
+python test.py
+```
