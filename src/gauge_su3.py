@@ -89,9 +89,9 @@ def mat_rand_su3():
     """
     alpha, gamma, a, c = random()*np.pi,random()*np.pi,random()*np.pi,random()*np.pi
     ybeta, yb, ytheta = random(),random(),random()
-    beta = np.acos(1-2*ybeta)/2
-    b = np.acos(1-2*yb)/2
-    theta = np.asin(ytheta**(1/4))
+    beta = np.arccos(1-2*ybeta)/2
+    b = np.arccos(1-2*yb)/2
+    theta = np.arcsin(ytheta**(1/4))
     phi = random()*2*np.pi
     return el_3(alpha) @ el_2(beta) @ el_3(gamma) @ el_5(theta) @ el_3(a) @ el_2(b) @ el_3(c) @ el_8(phi)
 

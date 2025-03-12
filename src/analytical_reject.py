@@ -387,23 +387,23 @@ def rejet_ana(gamma, plaquette, index_lambda):
             case 2|5:
                 match sign:
                     case (1,0):
-                        return np.pi - np.acos(gamma/(-a))
+                        return np.pi - np.arccos(gamma/(-a))
                     case (-1,0):
-                        return np.acos(gamma/a +1)
+                        return np.arccos(gamma/a +1)
                     case (0,1):
-                        return np.asin(gamma/b)
+                        return np.arcsin(gamma/b)
                     case (0,-1):
-                        return np.pi - np.asin(1+gamma/b) 
+                        return np.pi - np.arcsin(1+gamma/b) 
             case 3:
                 match sign:
                     case (1,0):
-                        return 2*np.pi - np.acos(gamma/a - 1)
+                        return 2*np.pi - np.arccos(gamma/a - 1)
                     case (-1,0):
-                        return np.acos(gamma/a+1)
+                        return np.arccos(gamma/a+1)
                     case (0,1):
-                        return np.asin(gamma/b)
+                        return np.arcsin(gamma/b)
                     case (0,-1):
-                        return np.asin(gamma/b+1)
+                        return np.arcsin(gamma/b+1)
 
     else:
         bound1, bound2 = intervalle(gamma, plaquette, index_lambda)
