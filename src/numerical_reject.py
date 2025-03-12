@@ -76,7 +76,7 @@ def roots_xi(plaquette):
     a,b,c,d = coeffs_8(plaquette)
     roots_xi = []
     for r in real:
-        xi = 2*np.sqrt(3)*np.atan(r) #Car le chgt de variable est r = tan(xi/2sqrt3))
+        xi = 2*np.sqrt(3)*np.arctan(r) #Car le chgt de variable est r = tan(xi/2sqrt3))
         
         xi = xi%(2*np.sqrt(3)*np.pi) #Le changement de variable inverse nous donne xi modulo 2sqrt(3)pi
         
